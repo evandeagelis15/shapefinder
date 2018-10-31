@@ -21,17 +21,31 @@ void getArgs(int argc, char** argv)
 					if (argv[i+1][0]!= '-')
 					{
 						shape = argv[i+1];
+						argCount++;
 					}
-				case 's':
+					argCount++;
+					break;
+				case 'o':
 					if (argv[i+1][0]!= '-')
 					{
-						shape = argv[i+1];
+						outName = argv[i+1];
+						argCount++;
 					}
-				
-
+					argCount++;
+					break;
+				case 'c':
+					if (argv[i+1][0]!= '-')
+					{
+						color = argv[i+1];
+						argCount++;
+					}
+					argCount++;
+					break;
+				default:
+					cout<<"not a valid argument"<<endl;
 			}
 		}
-		i++;
+		i+=2;
 	}
 }
 
