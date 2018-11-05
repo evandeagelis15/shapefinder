@@ -36,7 +36,7 @@ void getArgs(int argc, char **argv, string& inputFileName, string& shape, string
 				
 				for (int j = 0; j < sizeof(colors); j++)
 				{
-					if (strcmp(argv[i+1], colors[j]) || strcmp(argv[i+1], hex[j]) == 0)
+					if (strcmp(argv[i+1], colors[j])==0 || strcmp(argv[i+1], hex[j]) == 0)
 					{
 						color = argv[i+1];
 						i++;
@@ -237,7 +237,7 @@ void findRectangle(int** rImage, int y, int x, int* arr)
 int convertColor(string color)
 {
 	string colors[] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
-	string hex[] = {"000000", "ffffff", "0000ff", "ff0000", "00ff00", "ffff00" "00ffff", "ff00ff"};
+	string hex[] = {"000000", "ffffff", "0000ff", "0xff0000", "00ff00", "ffff00" "00ffff", "ff00ff"};
 
 	if (color[0]!='#')
 	{
@@ -246,6 +246,7 @@ int convertColor(string color)
 			if (strcmp(color.c_str(), colors[i].c_str()) == 0)
 			{
 				color = hex[i];
+				cout<<color<<endl;
 			}
 		}
 	}
@@ -253,8 +254,9 @@ int convertColor(string color)
 	{
     	color.replace(0,1,"");
 	}	
-	int x =stoi(color);
-  	return x;
+	unsigned int x =stoi(color);
+	cout<<x<<endl;
+  	return 1;
 }
 
 int main(int argc, char** argv)
