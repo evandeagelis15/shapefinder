@@ -237,7 +237,7 @@ void findRectangle(int** rImage, int y, int x, int* arr, int nCol)
 int convertColor(string color)
 {
 	string colors[8] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
-	const char* hex[8] = {"0x000000", "0xffffff", "0x0000ff", "0xff0000", "0x00ff00", "0xffff00" "0x00ffff", "0xff00ff"};
+	const char* hex[8] = {"0x000000", "0xffffff", "0x0000ff", "0xff0000", "0x00ff00", "0xffff00", "0x00ffff", "0xff00ff"};
 
 	if (color[0]!='#')
 	{
@@ -245,7 +245,8 @@ int convertColor(string color)
 		{
 			if (strcmp(color.c_str(), colors[i].c_str())==0)
 			{
-				color = hex[i-1];
+				color = hex[i];
+
 			}
 		}
 	}
