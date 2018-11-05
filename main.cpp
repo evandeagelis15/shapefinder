@@ -2,15 +2,15 @@
 #include <iostream>
 #include <fstream>
 
+#include <unistd.h>
+
 using namespace std;
 
-void getArgs(int argc, char** argv)
+void getArgs(int argc, char **argv, string& inputFileName, string& shape, string& color, string& outputFileName)
 {
-	string inputFileName = "";
-	string shape = "";
-	string color = "";
-	string outputFileName = "";
 	int count;
+	const char *colors[] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
+	const char *hex[] = {"#000000", "#ffffff", "#0000ff", "#ff0000", "#00ff00", "#ffff00" "#00ffff", "#ff00ff"};
 
 	if(argc == 8) //if arg count equals 8
 	{
@@ -19,15 +19,35 @@ void getArgs(int argc, char** argv)
 		{
 			if (strcmp(argv[i], "--shape") == 0 || strcmp(argv[i], "-s") == 0)
 			{
-				shape = argv[i+1];
-				i++;
-				cout << "Shape: " << shape << endl;
+				if (strcmp(argv[i+1], "rectangle") == 0)
+				{
+					shape = argv[i+1];
+					i++;
+					cout << "Shape: " << shape << endl;
+				}
+				else
+				{
+					cout << "Please enter supported shape" << endl;
+					exit(0);
+				}
 			}
 			else if (strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-c") == 0)
 			{
-				color = argv[i+1];
-				i++;
-				cout << "Color: " << color << endl;
+				
+				for (int j = 0; j < sizeof(colors); j++)
+				{
+					if (strcmp(argv[i+1], colors[j]) || strcmp(argv[i+1], hex[j]) == 0)
+					{
+						color = argv[i+1];
+						i++;
+						cout << "Color: " << color << endl;
+						break;
+					}
+					else
+					{
+						cout << "Please enter a supported color" << endl;
+					}
+				}
 			}
 			else if (strcmp(argv[i], "--output") == 0 || strcmp(argv[i], "-o") == 0)
 			{
@@ -37,17 +57,21 @@ void getArgs(int argc, char** argv)
 			}
 			else
 			{
-				inputFileName = argv[i];
-				cout << "Input File Name: " << inputFileName << endl;
+					inputFileName = argv[i];
+					cout << "Input File Name: " << inputFileName << endl;
 			}
 		}
-
 	}
 	else
 	{
-		cout << "Invalid Number of Arguments" << endl;
+		cout << "Invalid Number of Arguments:" << endl;
+		cout << "  - Enter an input file" << endl;
+		cout << "  - Enter -o or --output followed by an output file" << endl;
+		cout << "  - Enter -s or --shape followed by a shape" << endl;
+		cout << "  - Enter -c or --color followed by a color" << endl;
 	}
-}
+
+} /* getArgs() */
 
 int readImage(string inputFileName, string header, string height, string width, string max, int** rImage)
 {
@@ -69,10 +93,6 @@ int readImage(string inputFileName, string header, string height, string width, 
     
     while (inpImage >> pixels[i]) 
     {
-    	if (i>2819960)
-  		{
-  			cout<<i<<endl;
-  		}
     	r=(int)((bitset<8>(pixels[i])).to_ulong());
     	color =r;
   		i++;
@@ -102,12 +122,12 @@ int readImage(string inputFileName, string header, string height, string width, 
 	return 1;
 }
 
-int writeImage(int** rImage, string height, string width, string max)
+int writeImage(int** rImage, string height, string width, string max, string outputFileName)
 {
 	FILE *image;
-	if ((image = fopen( "out.ppm", "wb") ) == NULL)
+	if ((image = fopen( outputFileName.c_str(), "wb") ) == NULL)
  	{
- 		printf("file %s could not be created\n", "newSq.ppm");
+ 		printf("file %s could not be created\n", outputFileName.c_str());
  		return 0;
   	}
 
@@ -214,15 +234,43 @@ void findRectangle(int** rImage, int y, int x, int* arr)
 	arr[1]=othery;
 }
 
+int convertColor(string color)
+{
+	string colors[] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
+	string hex[] = {"000000", "ffffff", "0000ff", "ff0000", "00ff00", "ffff00" "00ffff", "ff00ff"};
+
+	if (color[0]!='#')
+	{
+		for (int i =0; i<8; i++)
+		{
+			if (strcmp(color.c_str(), colors[i].c_str()) == 0)
+			{
+				color = hex[i];
+			}
+		}
+	}
+	else
+	{
+    	color.replace(0,1,"");
+	}	
+	int x =stoi(color);
+  	return x;
+}
+
 int main(int argc, char** argv)
 {
-	//getArgs(argc, argv);
+	string inputFileName = "";
+	string shape = "";
+	string color = "";
+	string outputFileName = "";	
  	
  	string header="";
  	string height="";
  	string width="";
  	string max="";
- 	string inputFileName = "test2.ppm";
+ 	//string inputFileName = "sign_2.ppm";
+
+ 	getArgs(argc, argv, inputFileName, shape, color, outputFileName);
 
  	ifstream inpImage;
 
@@ -239,8 +287,6 @@ int main(int argc, char** argv)
     inpImage>>width;
     inpImage>>max;
 
-   
-
     inpImage.close();
 
     int** rImage = new int*[stoi(height)];
@@ -251,8 +297,6 @@ int main(int argc, char** argv)
  	cout<<stoi(height)<<endl<<stoi(width)<<endl;
  	readImage(inputFileName, header, height, width, max, rImage);
 
- 	int rr = 0;
- 	int cc = 0;
  	int *newCoords=new int[2];
  	newCoords[0]=0;
  	newCoords[1]=1;
@@ -268,16 +312,17 @@ int main(int argc, char** argv)
  	}
  	delete [] newCoords;
 
-     writeImage(rImage, height, width, max);
+ 	int nCol = convertColor(color);
+ 	cout<<nCol<<endl;
 
-     for (int i =0; i<stoi(height);i++)
+    writeImage(rImage, height, width, max, outputFileName);
+
+    for (int i =0; i<stoi(height);i++)
     {
     	delete [] rImage[i];
     }
 
     delete [] rImage;
-
-
 
 	return 0;
 }
