@@ -34,7 +34,7 @@ void getArgs(int argc, char **argv, string& inputFileName, string& shape, string
 			else if (strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-c") == 0)
 			{
 				
-				for (int j = 0; j < sizeof(colors); j++)
+				for (int j = 0; j < 8; j++)
 				{
 					if (strcmp(argv[i+1], colors[j])==0 || strcmp(argv[i+1], hex[j]) == 0)
 					{
@@ -196,7 +196,7 @@ int highestYOfLineToBottom(int** rImage, int y, int x, int boxColor)
 }
 
 
-void findRectangle(int** rImage, int y, int x, int* arr)
+void findRectangle(int** rImage, int y, int x, int* arr, int nCol)
 {
 	int cxInd =x;
 	int cyInd =y;
@@ -220,14 +220,14 @@ void findRectangle(int** rImage, int y, int x, int* arr)
  	cyInd=y-1;
  	while(cyInd<=othery+1) 
 	{
-		rImage[cyInd][x-1] = 0xFF0000;
-		rImage[cyInd][otherx+1] = 0xFF0000;
+		rImage[cyInd][x-1] = nCol;
+		rImage[cyInd][otherx+1] = nCol;
 		cyInd++;
 	}
 	while(cxInd<=otherx+1)
 	{
-		rImage[y-1][cxInd] = 0xFF0000;
-		rImage[othery+1][cxInd] = 0xFF0000;
+		rImage[y-1][cxInd] = nCol;
+		rImage[othery+1][cxInd] = nCol;
 		cxInd++;
 	}
 	arr[0]=otherx;
@@ -236,27 +236,25 @@ void findRectangle(int** rImage, int y, int x, int* arr)
 
 int convertColor(string color)
 {
-	string colors[] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
-	string hex[] = {"000000", "ffffff", "0000ff", "0xff0000", "00ff00", "ffff00" "00ffff", "ff00ff"};
+	string colors[8] = {"black", "white", "blue", "red", "green", "yellow", "cyan", "magenta"};
+	const char* hex[8] = {"0x000000", "0xffffff", "0x0000ff", "0xff0000", "0x00ff00", "0xffff00" "0x00ffff", "0xff00ff"};
 
 	if (color[0]!='#')
 	{
 		for (int i =0; i<8; i++)
 		{
-			if (strcmp(color.c_str(), colors[i].c_str()) == 0)
+			if (strcmp(color.c_str(), colors[i].c_str())==0)
 			{
-				color = hex[i];
-				cout<<color<<endl;
+				color = hex[i-1];
 			}
 		}
 	}
 	else
 	{
-    	color.replace(0,1,"");
+    	color.replace(0,1,"0x");
 	}	
-	unsigned int x =stoi(color);
-	cout<<x<<endl;
-  	return 1;
+	unsigned long hex_value= std::strtoul(color.c_str(), 0, 16);
+  	return hex_value;
 }
 
 int main(int argc, char** argv)
@@ -296,26 +294,28 @@ int main(int argc, char** argv)
     {
     	rImage[i]=new int[stoi(width)];
     }
- 	cout<<stoi(height)<<endl<<stoi(width)<<endl;
+ 	//cout<<stoi(height)<<endl<<stoi(width)<<endl;
  	readImage(inputFileName, header, height, width, max, rImage);
 
  	int *newCoords=new int[2];
  	newCoords[0]=0;
  	newCoords[1]=1;
+ 	int nCol = convertColor(color);
+
  	for(int rr =0; rr<stoi(height); rr++)
  	{
  		for (int cc = 0; cc<stoi(width); cc++)
  		{
  			if (rImage[rr][cc]!=rImage[0][0]&&(rr>newCoords[1]+1||cc>newCoords[0]+1))
  			{
- 				findRectangle(rImage, rr, cc, newCoords);
+ 				findRectangle(rImage, rr, cc, newCoords, nCol);
  			}
  		}
  	}
  	delete [] newCoords;
 
- 	int nCol = convertColor(color);
- 	cout<<nCol<<endl;
+ 	
+ 	//cout<<hex<<nCol<<endl;
 
     writeImage(rImage, height, width, max, outputFileName);
 
