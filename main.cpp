@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-
+#include <string.h>
 #include <unistd.h>
 
 using namespace std;
@@ -33,7 +33,7 @@ void getArgs(int argc, char **argv, string& inputFileName, string& shape, string
 			}
 			else if (strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-c") == 0)
 			{
-				
+				int found=0;	
 				for (int j = 0; j < 8; j++)
 				{
 					if (strcmp(argv[i+1], colors[j])==0 || strcmp(argv[i+1], hex[j]) == 0)
@@ -45,9 +45,11 @@ void getArgs(int argc, char **argv, string& inputFileName, string& shape, string
 					}
 					else
 					{
-						cout << "Please enter a supported color" << endl;
+						found =1;
 					}
 				}
+				if (found ==0)
+					cout << "Please enter a supported color" << endl;
 			}
 			else if (strcmp(argv[i], "--output") == 0 || strcmp(argv[i], "-o") == 0)
 			{
